@@ -1,5 +1,19 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(MaterialApp(
+    home:signinscreen()
+  ));
+}
 int wblnc= 10;
 bool twoalike= false;
 bool threealike=false;
@@ -7,12 +21,178 @@ bool fouralike=false;
 int wage=0;
 bool isInputEnabled=true;
 String res='';
-void main() => runApp(MaterialApp(
-  home: Home()
-));
+class signupscreen extends StatefulWidget {
+  const signupscreen({super.key});
+
+  @override
+  State<signupscreen> createState() => _signupscreenState();
+}
+
+class _signupscreenState extends State<signupscreen> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  void signUp() async {
+    try {
+      await _auth.createUserWithEmailAndPassword(
+        email: emailController.text,
+        password: passwordController.text,
+      );
+      User? user= _auth.currentUser;
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Account created successfully!"))
+      );
+      await FirebaseFirestore.instance.collection('users').doc(user!.uid).set({
+      'wallet_balance': 10});
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => Home(email: emailController.text)),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: ${e.toString()}"))
+      );
+    }
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: Text("Sign Up Page",
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),),
+          backgroundColor: Colors.black,
+          centerTitle: true,
+        ),
+        body: Center(
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [Container(
+                  padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 0),
+                  child: TextFormField(
+                    controller: emailController,
+                    decoration: InputDecoration(
+                      labelText: "Email",
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.mail),
+
+                    ),
+                    keyboardType: TextInputType.text,
+                    obscureText: false,
+
+                  ),),
+                  SizedBox(height: 10.0,),
+                  Container(
+                      padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 0),
+                      child: TextFormField(
+                        controller: passwordController,
+                          decoration: InputDecoration(
+                            labelText: "Password",
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.lock),
+
+                          ),
+                          keyboardType: TextInputType.text,
+                          obscureText: false)),
+                  SizedBox(height: 20.0,),
+                  ElevatedButton(onPressed: (){signUp();}, child: Text("Create Account")),
+                  SizedBox(height: 50.0,),
+                  TextButton(onPressed: (){Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => signinscreen()),);}, child: Text("Already have an account? Sign in here"))
+
+                ]))
+    );
+  }
+}
+
+class signinscreen extends StatefulWidget {
+  const signinscreen({super.key});
+
+  @override
+  State<signinscreen> createState() => _signinscreenState();
+}
+
+class _signinscreenState extends State<signinscreen> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  void signIn() async {
+  try {
+  await _auth.signInWithEmailAndPassword(
+  email: emailController.text,
+  password: passwordController.text,
+  );
+  ScaffoldMessenger.of(context).showSnackBar(
+  SnackBar(content: Text("Signed in successfully!"))
+  );
+  Navigator.pushReplacement(
+  context,
+  MaterialPageRoute(builder: (context) => Home(email: emailController.text,)),
+  );
+  } catch (e) {
+  ScaffoldMessenger.of(context).showSnackBar(
+  SnackBar(content: Text("Error: ${e.toString()}"))
+  );
+  }
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Sign In Page",
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),),
+        backgroundColor: Colors.black,
+        centerTitle: true,
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+        children: [Container(
+          padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 0),
+          child: TextFormField(
+            controller: emailController,
+        decoration: InputDecoration(
+          labelText: "Email",
+          border: OutlineInputBorder(),
+          prefixIcon: Icon(Icons.mail),
+
+        ),
+        keyboardType: TextInputType.text,
+        obscureText: false,
+
+      ),),
+        SizedBox(height: 10.0,),
+        Container(
+            padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 0),
+            child: TextFormField(
+              controller: passwordController,
+                decoration: InputDecoration(
+                  labelText: "Password",
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.lock),
+
+                ),
+                keyboardType: TextInputType.text,
+                obscureText: true)),
+          SizedBox(height: 20.0,),
+          ElevatedButton(onPressed: (){signIn();}, child: Text("Sign in")),
+          SizedBox(height: 50.0,),
+          TextButton(onPressed: (){Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => signupscreen()));}, child: Text("Don't have an account? Sign up here"))
+
+        ]))
+      );
+
+  }
+}
 
 class Home extends StatefulWidget {
-  const Home({super.key});
+  final String email;
+  const Home({super.key, required this.email});
 
   @override
   State<Home> createState() => _HomeState();
@@ -20,6 +200,20 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   @override
+  void initState() {
+    super.initState();
+    fetchWalletBalance();
+  }
+  void fetchWalletBalance() async{
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user!= null){
+      DocumentSnapshot doc= await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      if (doc.exists){
+        setState(() {
+          wblnc=doc['wallet_balance'];
+        });
+      }
+  }}
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -32,11 +226,14 @@ class _HomeState extends State<Home> {
           fontWeight: FontWeight.bold,
         )),
         centerTitle: true,
+        actions: [TextButton(onPressed: () async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> signinscreen()));}, child: Text("Log Out",style: TextStyle(color: Colors.redAccent),))],
       ),
       body: Container(
     decoration: BoxDecoration(
     image: DecorationImage(
-        image: AssetImage("assets/3d-dice-nature_23-2151110332.jpg"),
+        image: AssetImage("assets/home page.jpg"),
     fit: BoxFit.cover,
     ),
     ),
@@ -44,17 +241,15 @@ class _HomeState extends State<Home> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container( padding: EdgeInsets.all(30.0),
-                  color: Colors.black87,
-                  child: Text(
-                  'Dice Game',
-                  style: TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),),
-                SizedBox(height: 200),
+                Container(
+                  child: Text("Welcome, ${widget.email}",
+                  style: TextStyle(color: Colors.blue,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold),),
+                  padding: EdgeInsets.symmetric(horizontal: 20.0,vertical: 0)
+                ),
+                SizedBox(height: 275,),
+
                 ElevatedButton(
                   onPressed: () {
                     Navigator.push(
@@ -63,9 +258,13 @@ class _HomeState extends State<Home> {
                     );
                   },
                   child: Text('Play Game'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white
+                  ),
 
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: () {
                     Navigator.push(
@@ -73,6 +272,10 @@ class _HomeState extends State<Home> {
                       MaterialPageRoute(builder: (context) => WalletBalancePage()),
                     );
                   },
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white
+                  ),
                   child: Text('Check Wallet Balance'),
                 ),
               ],
@@ -205,11 +408,21 @@ class _WalletBalancePageState extends State<WalletBalancePage> {
             ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {
+              onPressed: ()  {
                 setState(() {
-                  wblnc += 5;
-                });
-              },
+                  wblnc += 5;});
+                  User? user= FirebaseAuth.instance.currentUser;
+                  setState(() async{
+    if (user!= null){
+    await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+    'wallet_balance': wblnc,
+    }, SetOptions(merge: true));
+    }
+
+                  });
+
+                },
+
               child: Text('Add Coins'),
             ),
 
@@ -276,7 +489,7 @@ class _PlayGamePageState extends State<PlayGamePage> {
       }
     });
   }
-  void updateWallet(){
+  void updateWallet() async{
     if (twoalike){
       if (gameResult){
         wblnc+=2*wage;
@@ -303,7 +516,14 @@ class _PlayGamePageState extends State<PlayGamePage> {
         wblnc-=4*wage;
 
       }
-    }}
+    }
+  User? user= FirebaseAuth.instance.currentUser;
+  if (user!= null){
+    await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+      'wallet_balance': wblnc,
+    }, SetOptions(merge: true));
+  }
+  }
   void rollDice() {
     FocusScope.of(context).unfocus();
     isInputEnabled=false;

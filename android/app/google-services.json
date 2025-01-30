@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "861005520345",
+    "project_id": "stakedicegame-165ba",
+    "storage_bucket": "stakedicegame-165ba.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:861005520345:android:4e4894fb04b746c5278dc8",
+        "android_client_info": {
+          "package_name": "com.example.projects"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD1zRhlpADwKTb8kgvijiNoRw0YujDIJAg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
